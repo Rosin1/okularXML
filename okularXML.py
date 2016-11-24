@@ -91,8 +91,8 @@ def parse(mylog):
     parser = argparse.ArgumentParser(
         description='handle the xmls of okular reader.')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-r', '--rename', nargs="*", action='store')
-    group.add_argument('-d', '--delete', nargs="*", action='store')
+    group.add_argument('-r', '--rename', nargs="*", action='store', help='rename doc.')
+    group.add_argument('-d', '--delete', nargs="*", action='store', help='delete doc.')
     parser.add_argument('-x', '--xml', action='store_true')
     args = parser.parse_args()
     try:
