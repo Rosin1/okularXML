@@ -91,14 +91,14 @@ def parse(mylog):
     parser = argparse.ArgumentParser(
         description='handle the xmls of okular reader.')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-r', '--rename', nargs="*", action='store')
-    group.add_argument('-d', '--delete', nargs="*", action='store')
-    parser.add_argument('-x', '--xml', action='store_true')
+    group.add_argument('-r', '--rename', nargs="*", action='store', help='rename doc.')
+    group.add_argument('-d', '--delete', nargs="*", action='store', help='delete doc.')
+    parser.add_argument('-x', '--xml', action='store_true', help='show xml path.')
     args = parser.parse_args()
     try:
         assert args.xml == True or (args.rename != None or args.delete != None)
     except AssertionError as e:
-        mylog.fatal("wrong input")
+        mylog.fatal("wrong input.")
         sys.exit(1)
     return args
 
