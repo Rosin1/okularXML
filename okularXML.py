@@ -8,6 +8,8 @@ file noted by okular
     2. delete file
         delete okular xml
 
+    3. get xml
+
 list all xmls(ignore that is needed)
     delete useless.
 '''
@@ -26,9 +28,7 @@ class HandleOkularXml:
         self.filename = ""
         self.filename_base = ""
         self.xml_path = "/home/zzp/.kde/share/apps/okular/docdata/"
-        self.xml_important = ""
         self.xmlfilename = ""
-        self.xmlfilename_base = ""
         self.id = ""
 
     def config(self, filename):
@@ -59,7 +59,6 @@ class HandleOkularXml:
             self.mylog.debug("found xml: %s" % self.xmlfilename)
             self.id = xmlfilename_base[:xmlfilename_base.index(".")]
             self.mylog.debug("found id: %s" % self.id)
-            pass
 
     def rename(self, newname):
         """rename document and rename xml at the same time"""
@@ -85,18 +84,36 @@ class HandleOkularXml:
             os.remove(self.xmlfilename)
             self.mylog.done("xml has been deleted.")
 
+    def getxml(self):
+        """get xml to each document dir."""
+        import shutil
+        if not os.path.exists(self.xmlfilename):
+            self.mylog.error("xml not found!")
+        else:
+            self.mylog.info("xml: %s" %self.xmlfilename)
+            shutil.copyfile(self.xmlfilename,
+                            os.path.join(os.path.dirname(self.filename),
+                                         os.path.basename(self.xmlfilename)))
+            self.mylog.done('xml has been copied into document dir.')
+
 
 def parse(mylog):
     import argparse
     parser = argparse.ArgumentParser(
         description='handle the xmls of okular reader.')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-r', '--rename', nargs="*", action='store', help='rename doc.')
-    group.add_argument('-d', '--delete', nargs="*", action='store', help='delete doc.')
-    parser.add_argument('-x', '--xml', action='store_true', help='show xml path.')
+    group.add_argument('-r', '--rename', nargs="*",
+                       action='store', help='rename doc.')
+    group.add_argument('-d', '--delete', nargs="*",
+                       action='store', help='delete doc.')
+    group.add_argument('-g', '--getxml', nargs="*",
+                       action='store', help='get xml to each document dir.')
+    parser.add_argument('-x', '--xml', action='store_true',
+                        help='show xml path.')
     args = parser.parse_args()
     try:
-        assert args.xml == True or (args.rename != None or args.delete != None)
+        assert args.xml == True or (
+            args.rename != None or args.delete != None or args.getxml != None)
     except AssertionError as e:
         mylog.fatal("wrong input.")
         sys.exit(1)
@@ -108,19 +125,27 @@ def main(mylog, args):
     if args.xml == True:
         hox = HandleOkularXml(mylog)
         mylog.done(hox.xml_path)
-    elif args.rename == None and len(args.delete) >= 1:
+    elif args.delete != None:
+        mylog.debug("correct delete args.")
         for filename in args.delete:
             hox = HandleOkularXml(mylog)
             mylog.info('file: %s' % filename)
             hox.config(filename)
             hox.delete()
-    elif args.delete == None and len(args.rename) == 2:
+    elif args.rename != None and len(args.rename) == 2:
         mylog.debug("correct rename args.")
         filename, newname = args.rename
         hox = HandleOkularXml(mylog)
         mylog.info('file: %s' % filename)
         hox.config(filename)
         hox.rename(newname)
+    elif args.getxml != None:
+        mylog.debug("correct getxml args.")
+        for filename in args.getxml:
+            hox = HandleOkularXml(mylog)
+            mylog.info('file: %s' % filename)
+            hox.config(filename)
+            hox.getxml()
     else:
         mylog.fatal("wrong args.")
         sys.exit(1)
