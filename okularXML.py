@@ -10,8 +10,8 @@ file noted by okular
 
     3. get xml
 
-list all xmls(ignore that is needed)
-    delete useless.
+    4. delete xml
+
 '''
 import os
 import sys
@@ -96,6 +96,13 @@ class HandleOkularXml:
                                          os.path.basename(self.xmlfilename)))
             self.mylog.done('xml has been copied into document dir.')
 
+    def deletexml(self):
+        if not os.path.exists(self.xmlfilename):
+            self.mylog.error("xml not found!")
+        else:
+            os.remove(self.xmlfilename)
+            self.mylog.done('xml has been deleted.')
+
 
 def parse(mylog):
     import argparse
@@ -108,15 +115,11 @@ def parse(mylog):
                        action='store', help='delete doc.')
     group.add_argument('-g', '--getxml', nargs="*",
                        action='store', help='get xml to each document dir.')
+    group.add_argument('-dx', '--deletexml', nargs="*",
+                  action='store', help='delete xml of each documents.')
     parser.add_argument('-x', '--xml', action='store_true',
                         help='show xml path.')
     args = parser.parse_args()
-    try:
-        assert args.xml == True or (
-            args.rename != None or args.delete != None or args.getxml != None)
-    except AssertionError as e:
-        mylog.fatal("wrong input.")
-        sys.exit(1)
     return args
 
 
@@ -146,6 +149,13 @@ def main(mylog, args):
             mylog.info('file: %s' % filename)
             hox.config(filename)
             hox.getxml()
+    elif args.deletexml != None:
+        mylog.debug("correct deletexml args.")
+        for filename in args.deletexml:
+            hox = HandleOkularXml(mylog)
+            mylog.info('file: %s' % filename)
+            hox.config(filename)
+            hox.deletexml()
     else:
         mylog.fatal("wrong args.")
         sys.exit(1)
